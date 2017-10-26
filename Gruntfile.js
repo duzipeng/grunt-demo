@@ -1,36 +1,47 @@
 module.exports = function (grunt) {
 
-  //Project configuration
+  var sassStyle = 'expanded';
+
   grunt.initConfig({
-    log: {
-      foo: [1, 2, 3],
-      bar: 'hello world',
-      baz: false
+    pkg: grunt.file.readJSON('package.json'),
+    sass: {
+      output: {
+        options: {
+          style: sassStyle
+        },
+        files: {
+          './style.css': './scss/style.scss'
+        }
+      }
+    },
+    concat: {
+      dist: {
+        src: ['./src/plugin.js', './src/plugin2.js'],
+        dest: './global.js'
+      }
+    },
+    uglify: {
+      compressjs: {
+        files: {
+          './global.min.js': ['<%= concat.dist.dest %>']
+        }
+      }
+    },
+    jshint: {
+      all: ['<%= concat.dist.dest %>'],
+      options: {
+        browser: true
+      }
     }
   });
 
-  // 多任务
-  grunt.registerMultiTask('log', 'Log stuff', function () {
-    grunt.log.writeln(this.target + ': ' + this.data)
-  });
-  // 普通任务
-  grunt.registerTask('foo', 'my "foo" task.', function () {
-    grunt.task.run('bar', 'baz');
-  });
-  // 默认任务
-  grunt.registerTask('default', 'My "default" task description.', function () {
-    grunt.log.writeln('Currently running the "default" task.');
-  });
-  // 自定义任务
-  grunt.registerTask('asyncfoo', 'My "asyncfoo" task.', function () {
-    // Force task into async mode and grab a handle to the "done" function.
-    var done = this.async();
-    // Run some sync stuff.
-    grunt.log.writeln('Processing task...');
-    // And some async stuff.
-    setTimeout(function () {
-      grunt.log.writeln('All done!');
-      done();
-    }, 1000)
-  })
+  grunt.loadNpmTasks('grunt-contrib-sass');
+  grunt.loadNpmTasks('grunt-contrib-concat');
+  grunt.loadNpmTasks('grunt-contrib-uglify');
+  grunt.loadNpmTasks('grunt-contrib-jshint');
+
+  grunt.registerTask('outputcss', ['sass']);
+  grunt.registerTask('concatjs', ['concat']);
+  grunt.registerTask('compressjs', ['concat', 'jshint', 'uglify']);
+  grunt.registerTask('default');
 }
