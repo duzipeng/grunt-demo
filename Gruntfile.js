@@ -28,9 +28,40 @@ module.exports = function (grunt) {
       }
     },
     jshint: {
-      all: ['<%= concat.dist.dest %>'],
+      all: ['<%= concat.dist.dest %>']
+    },
+    watch: {
+      scripts: {
+        files: ['.src/plugin.js', './src/plugin2.js'],
+        tasks: ['concat', 'jshint', 'uglify']
+      },
+      sass: {
+        files: ['./scss/style.scss'],
+        tasks: ['sass']
+      },
+      livereload: {
+        options: {
+          livereload: '<%= connect.options.lovereload %>'
+        },
+        files: [
+          'index.html',
+          'style.css',
+          'js/global.min.js'
+        ]
+      }
+    },
+    connect: {
       options: {
-        browser: true
+        port: 9000,
+        open: true,
+        livereload: 35729,
+        hostname: 'localhost'
+      },
+      server: {
+        options: {
+          port: 9001,
+          base: './'
+        }
       }
     }
   });
@@ -39,9 +70,12 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-contrib-connect');
 
   grunt.registerTask('outputcss', ['sass']);
   grunt.registerTask('concatjs', ['concat']);
   grunt.registerTask('compressjs', ['concat', 'jshint', 'uglify']);
+  grunt.registerTask('watchit', ['sass', 'concat', 'jshint', 'uglify', 'connect', 'watch']);
   grunt.registerTask('default');
 }
